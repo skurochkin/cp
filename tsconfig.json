@@ -8,6 +8,12 @@
         "lib": ["es5", "dom"],
         "types": ["cypress", "node"]
   },
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "ES2015", 
+    }
+},
     "include": ["**/*.ts"],
     "exclude": ["node_modules"]
 }
