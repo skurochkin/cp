@@ -13,5 +13,5 @@ jobs:
       - name: Cypress test
         uses: cypress-io@github-action@v5
         with:
-          command: npm usrun cy:run
+          command: npm run cy:run
 
