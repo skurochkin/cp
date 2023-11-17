@@ -1,0 +1,20 @@
+{
+  "name": "cp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "test framework for cp.pt website",
+  "main": "index.js",
+  "scripts": {
+    "cy:open": "npx cypress open",
+    "cy:run": "npx cypress run"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@cypress/webpack-preprocessor": "^6.0.0",
+    "cypress": "^13.5.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "webpack": "^5.89.0"
+  }
+}
