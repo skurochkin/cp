@@ -1,7 +1,6 @@
 {
   "name": "cp",
   "version": "1.0.0",
-  "type": "module",
   "description": "test framework for cp.pt website",
   "main": "index.js",
   "scripts": {
