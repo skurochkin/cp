@@ -6,10 +6,20 @@ This a test project with Cypress. The repo contains only one positive test, whic
 - Make sure you have right node version installed `nvm use`
 - Install dependencies `npm i`
 
+### Running tests on your local environment
+
 - Run cypress in open mode `npm  run cy:open`
 - Run cypress in headles mode `npm run cy:run`
 
 ![Alt text](/assets/cypress.png "Cypress test")
+
+
+### Running tests in CI
+- Navigate to [github atctions](https://github.com/skurochkin/cp/actions/workflows/manual.yml)
+- Trigger the workflow
+
+![Alt text](/assets/ga.png "Cypress test")
+
 
 
 ### Notes:
