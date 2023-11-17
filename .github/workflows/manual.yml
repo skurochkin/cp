@@ -1,0 +1,17 @@
+name: Manual trigger
+on:
+  workflow_dispatch
+
+jobs:
+  test:
+  runs-on: ubuntu-22.04
+  name: e2e-test
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Cypress test
+      uses: cypress-io@github-action@v5
+      with:
+       run: npm run cy:run
+
