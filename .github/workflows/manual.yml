@@ -3,15 +3,13 @@ on:
   workflow_dispatch
 
 jobs:
-  test:
+  cypress-run:
     runs-on: ubuntu-22.04
-    name: e2e-test
     steps:
-      - name: Code checkout
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Cypress test
-        uses: cypress-io@github-action@v5
-        with:
+  
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
           command: npm run cy:run
 
