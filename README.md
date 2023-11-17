@@ -1,15 +1,15 @@
 ### Description
-This a test project with Cypress. The repo contains only one positive test, which search for the given parameters and asserting the result. The project is written in TypeScript and using modular approach.
+This is a test project with Cypress. The repo contains only one positive test, which searches for the given parameters and asserts the result. The project is written in TypeScript and uses a modular approach.
 
 ### Project setup
 
-- Make sure you have right node version installed `nvm use`
+- Make sure you have the right node version installed `nvm use`
 - Install dependencies `npm i`
 
 ### Running tests on your local environment
 
 - Run cypress in open mode `npm  run cy:open`
-- Run cypress in headles mode `npm run cy:run`
+- Run cypress in headless mode `npm run cy:run`
 
 ![Alt text](/assets/cypress.png "Cypress test")
 
@@ -23,13 +23,13 @@ This a test project with Cypress. The repo contains only one positive test, whic
 
 
 ### Notes:
-- Looking at the application storage, it looks like it is not managing state on the client side, instead it is performed on the server side. 
-- When user submitting the form he/se gets redirected to the subdomain, not sure what is decision behind it, but that's imposing the complexity of a state mamagement. Also different fav icon presented on the browser tab
-- When user click cancel button from the search result the application makes `POST` request to the main domain, although you dont submit anything
-- The departure destination missing the id attribute, and arrival does have it, so instead of using id's I picked the name attribure
-- The tooltip for input fields not always clearing, specially when running the automation, so in order to unblock the form completion we have to remove the tooltip
-- The calendar dates is in UTC, which is not accounting for the client local time
-- The error messages for a destinations is not clear and could provide more information on the problem 
+- Looking at the application storage, it looks like it is not managing state on the client side, instead, it is performed on the server side. 
+- When the user submits the form he/she gets redirected to the subdomain, not sure what is decision behind it is, but that's imposing the complexity of a state management. Also, different fav icons presented on the browser tab
+- When the user clicks the cancel button from the search result the application makes `POST` request to the main domain, although you don't submit anything
+- The departure destination missing the ID attribute, and the arrival does have it, so instead of using ID I picked the name attribute
+- The tooltip for input fields is not always clear, especially when running the automation, so in order to unblock the form completion we have to remove the tooltip
+- The calendar dates are in UTC, which does not account for the client's local time
+- The error messages for a destination are not clear and could provide more information on the problem 
 
 ### Further test cases to automate
 Positive Test Case - Search for a Valid Route:
@@ -72,15 +72,15 @@ Expected Output: Display a message indicating that there are no tickets availabl
 ### Scanner reports
 
 - Frontend Performance: [report](https://googlechrome.github.io/lighthouse/viewer/?gist=e1261d0df20cea2d64c3d2c0bd45fa84)
-- Accessability:
+- Accessibility:
 ![Alt text](/assets/accessability.png "Accessebility test")
 
 
-### Suggestions for imporvment
+### Suggestions for improvement
 
 - add test id attributes 
-- add loading animation after search form submited
+- add loading animation after the search form submitted
 - add proper error messaging
-- state management on a client side
-- `GET` request instead of `POST` when retriving information
+- state management on a client-side
+- `GET` request instead of `POST` when retrieving information
 - decouple frontend from backend
