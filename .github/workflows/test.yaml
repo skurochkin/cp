@@ -20,6 +20,9 @@ jobs:
               | jq -r '.[] | select(.state == "APPROVED")' \
               | grep -c "id")
           echo "IS_APPROVED: $IS_APPROVED"
+          # Print commit references for debugging
+          echo "github.event.before: ${{ github.event.before }}"
+          echo "github.sha: ${{ github.sha }}"
           # Check if there are code changes since last approval
           DIFF_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
           echo "DIFF_FILES: $DIFF_FILES"
