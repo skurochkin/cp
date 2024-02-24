@@ -27,7 +27,7 @@ jobs:
         run: |
           REVIEW_STATE=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews?per_page=100" \
-              | jq -r 'map(select(.state == "APPROVED"))) | length')
+              | jq -r 'map(select(.state == "APPROVED")) | length')
           echo "REVIEW_STATE: $REVIEW_STATE"
           # Print commit references for debugging
           echo "BASE_SHA: $BASE_SHA"
