@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2  # This step ensures the repository is checked out
+
       - name: Check if PR is approved and code has changed
         id: check-pr
         run: |
@@ -32,5 +35,4 @@ jobs:
       - name: Run Job if conditions met
         if: steps.check-pr.outputs.run_job == 'true'
         run: |
-          # Your job steps here
           echo 'Test Quest'
