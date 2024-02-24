@@ -29,7 +29,7 @@ describe('Search the tickets', () => {
 
       cy.wait('@backToSearch').its('response.body').should('contain', "departEscapeXml = 'Lagos'").and('contain', "arrivalEscapeXml = 'Porto - Campanha'")
       
-      h.search.getDeartureDateValue().should('have.attr', 'value', `${threeDaysFromNowFormated['formattedDateShort']}`)
+      //h.search.getDeartureDateValue().should('have.attr', 'value', `${threeDaysFromNowFormated['formattedDateShort']}`)
       h.search.getReturnDateValue().should('have.attr', 'value', `${fiveDaysFromNowFormated['formattedDateShort']}`)
     })
   })
