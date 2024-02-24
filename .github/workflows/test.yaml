@@ -31,6 +31,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Run Job if conditions met
-        if: env.run_job == 'true'
+        if: env.run_job == 'false'
         run: |
          echo 'test request'
