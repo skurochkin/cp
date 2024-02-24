@@ -1,0 +1,29 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is approved and code has changed
+        id: check-pr
+        run: |
+          # Get the latest commit SHA
+          LAST_COMMIT=$(git rev-parse HEAD)
+          # Check if the pull request is approved
+          IS_APPROVED=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews?per_page=100" \
+              | jq -r '.[] | select(.state == "APPROVED") | .commit_id' \
+              | grep -c "$LAST_COMMIT")
+          # Check if there are code changes since last approval
+          DIFF_FILES=$(git diff --name-only HEAD^ HEAD)
+          if [ $IS_APPROVED -eq 1 ] && [ -n "$DIFF_FILES" ]; then
+              echo "::set-output name=run_job::true"
+          else
+              echo "::set-output name=run_job::false"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Run Job if conditions met
+        if: steps.check-pr.outputs.run_job == 'true'
+        run: |
+          # Your job steps here
