@@ -11,6 +11,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2  # This step ensures the repository is checked out
 
+      - name: Get base commit SHA
+        id: base-commit
+        run: |
+          BASE_SHA=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+              | jq -r '.base.sha')
+          echo "BASE_SHA: $BASE_SHA"
+          echo "BASE_SHA" >> $GITHUB_ENV
+
       - name: Check if PR is approved and code has changed
         id: check-pr
         run: |
@@ -21,10 +30,10 @@ jobs:
               | grep -c "id")
           echo "IS_APPROVED: $IS_APPROVED"
           # Print commit references for debugging
-          echo "github.event.before: ${{ github.event.before }}"
+          echo "BASE_SHA: $BASE_SHA"
           echo "github.sha: ${{ github.sha }}"
           # Check if there are code changes since last approval
-          DIFF_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          DIFF_FILES=$(git diff --name-only $BASE_SHA ${{ github.sha }})
           echo "DIFF_FILES: $DIFF_FILES"
           if [ $IS_APPROVED -eq 1 ] && [ -n "$DIFF_FILES" ]; then
               echo "run_job=true" >> $GITHUB_ENV

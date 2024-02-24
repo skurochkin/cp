@@ -31,7 +31,6 @@ describe('Search the tickets', () => {
       
       //h.search.getDeartureDateValue().should('have.attr', 'value', `${threeDaysFromNowFormated['formattedDateShort']}`)
       h.search.getReturnDateValue().should('have.attr', 'value', `${fiveDaysFromNowFormated['formattedDateShort']}`)
-      h.search.getReturnDateValue().should('have.attr', 'value', `${fiveDaysFromNowFormated['formattedDateShort']}`)
     })
   })
   
