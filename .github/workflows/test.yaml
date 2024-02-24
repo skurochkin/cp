@@ -19,8 +19,10 @@ jobs:
               "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews?per_page=100" \
               | jq -r '.[] | select(.state == "APPROVED")' \
               | grep -c "id")
+          echo "IS_APPROVED: $IS_APPROVED"
           # Check if there are code changes since last approval
           DIFF_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+          echo "DIFF_FILES: $DIFF_FILES"
           if [ $IS_APPROVED -eq 1 ] && [ -n "$DIFF_FILES" ]; then
               echo "run_job=true" >> $GITHUB_ENV
           else
@@ -31,6 +33,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Run Job if conditions met
-        if: env.run_job == 'false'
+        if: env.run_job == 'true'
         run: |
          echo 'test request'
