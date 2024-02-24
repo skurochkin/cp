@@ -26,16 +26,16 @@ jobs:
         id: check-pr
         run: |
           # Check if the pull request is approved
-          IS_APPROVED=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+          REVIEW_STATE=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews?per_page=100" \
-              | jq -r 'if length > 0 then .[0].state else "NOT_FOUND" end')
-          echo "IS_APPROVED: $IS_APPROVED"
+              | jq -r '.[0].state' || echo "NOT_FOUND")
+          echo "REVIEW_STATE: $REVIEW_STATE"
           # Print commit references for debugging
           echo "BASE_SHA: $BASE_SHA"
           echo "github.sha: ${{ github.sha }}"
           # Check if there are code changes since last approval
-          if [ "$IS_APPROVED" != "NOT_FOUND" ]; then
-              DIFF_FILES=$(git diff --name-only $BASE_SHA ${{ github.sha }})
+          if [ "$REVIEW_STATE" != "NOT_FOUND" ]; then
+              DIFF_FILES=$(git diff --name-only $BASE_SHA ${{ github.sha }}) || true
               echo "DIFF_FILES: $DIFF_FILES"
               if [ -n "$DIFF_FILES" ]; then
                   echo "run_job=true" >> $GITHUB_ENV
