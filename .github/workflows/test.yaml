@@ -17,8 +17,8 @@ jobs:
           BASE_SHA=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
               | jq -r '.base.sha')
-          echo "BASE_SHA: $BASE_SHA"
-          echo "BASE_SHA" >> $GITHUB_ENV
+          echo "BASE_SHA=$BASE_SHA" >> $GITHUB_ENV
+          echo "BASE_SHA=$BASE_SHA"
 
       - name: Check if PR is approved and code has changed
         id: check-pr
