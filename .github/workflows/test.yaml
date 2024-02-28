@@ -26,14 +26,14 @@ jobs:
         id: check-pr
         run: |
           REVIEW_STATE=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-              "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews?per_page=100" \
-              | jq -r 'map(select(.state == "APPROVED")) | length')
-          echo "REVIEW_STATE: $REVIEW_STATE"
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews?per_page=100")
+          REVIEW_STATE_COUNT=$(echo "$REVIEW_STATE" | jq -r 'map(select(.state == "APPROVED")) | length')
+          echo "REVIEW_STATE_COUNT: $REVIEW_STATE_COUNT"
           # Print commit references for debugging
           echo "BASE_SHA: $BASE_SHA"
           echo "github.sha: ${{ github.sha }}"
           # Check if there are code changes since last approval
-          if [ "$REVIEW_STATE" -gt 0 ]; then
+          if [ "$REVIEW_STATE_COUNT" -gt 0 ]; then
               DIFF_FILES=$(git diff --name-only $BASE_SHA ${{ github.sha }}) || true
               echo "DIFF_FILES: $DIFF_FILES"
               if [ -n "$DIFF_FILES" ]; then
