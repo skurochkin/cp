@@ -1,4 +1,4 @@
-name: Check New Commits
+name: Check New Commits on Pull Request Review
 
 on:
   pull_request_review:
@@ -15,14 +15,30 @@ jobs:
         id: last_commit
         run: echo "::set-output name=sha::$(git rev-parse HEAD)"
 
-      - name: Retrieve Current Head Commit SHA
-        id: head_commit
-        run: echo "::set-output name=sha::$(git ls-remote origin refs/pull/${{ github.event.pull_request.number }}/head | cut -f1)"
+      - name: Check if last commit SHA exists
+        id: check_last_commit_sha
+        run: |
+          if [ -f last_commit_sha.txt ]; then
+            echo "Last commit SHA exists."
+          else
+            echo "No previous commit SHA found. Assuming this is the first run."
+            echo "::set-output name=exists::false"
+          fi
+
+      - name: Save commit SHA as an artifact
+        if: steps.check_last_commit_sha.outputs.exists == 'false'
+        uses: actions/upload-artifact@v2
+        with:
+          name: last_commit_sha
+          path: last_commit_sha.txt
 
       - name: Compare SHAs
+        if: steps.check_last_commit_sha.outputs.exists != 'false'
         run: |
-          if [ "${{ steps.last_commit.outputs.sha }}" == "${{ steps.head_commit.outputs.sha }}" ]; then
+          LAST_SHA=$(cat last_commit_sha.txt)
+          if [ "${LAST_SHA}" == "${{ steps.last_commit.outputs.sha }}" ]; then
             echo "No new commits since last job execution."
           else
             echo "New commits detected since last job execution."
+            exit 1
           fi
