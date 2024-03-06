@@ -3,66 +3,27 @@ on:
     types: [submitted]
 
 jobs:
-  check-commits:
+  check_commit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Retrieve Last Commit SHA
-        id: last_commit
-        run: echo "::set-output name=sha::$(git rev-parse HEAD)"
-
-      - name: Check if last commit SHA exists
-        id: check_last_commit_sha
+      - name: Check if previous commit is different
         run: |
-          if [ -f last_commit_sha.txt ]; then
-            echo "Last commit SHA exists."
-            echo "::set-output name=exists::true"
-          else
-            echo "No previous commit SHA found. Assuming this is the first run."
-            echo "::set-output name=exists::false"
-          fi
+          if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+            # Fetch the previous commit SHA from GitHub API
+            PREVIOUS_COMMIT=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PULL_REQUEST/events" | jq '.[] | select(.event == "pull_request" and .commit_id != "'"$GITHUB_SHA"'") | .commit_id' | head -n 1 | tr -d '"')
 
-      - name: Download last commit SHA artifact
-        if: always()
-        uses: actions/download-artifact@v2
-        with:
-          name: last_commit_sha
-          path: artifacts
-        continue-on-error: true
-
-      # Read the last commit SHA from the artifact
-      - name: Read last commit SHA
-        id: read_last_commit_sha
-        run: |
-          LAST_SHA=$(cat artifacts/last_commit_sha.txt)
-          echo "::set-output name=last_sha::$LAST_SHA"
-        continue-on-error: true      
-
-      - name: Compare SHAs
-        if: ${{ steps.check_last_commit_sha.outputs.exists == 'true' }}
-        run: |
-          if [ -f last_commit_sha.txt ]; then
-            LAST_SHA=$(cat last_commit_sha.txt)
-            if [ "${LAST_SHA}" == "${{ steps.last_commit.outputs.sha }}" ]; then
-              echo "No new commits since last job execution."
+            # Compare previous commit with current commit
+            if [ "$PREVIOUS_COMMIT" != "" ]; then
+              echo "Previous commit is different from current commit"
+              # Do something here, like running additional checks or tasks
             else
-              echo "${LAST_SHA}"
-              echo "${{steps.last_commit.outputs.sha}}"
-              echo "New commits detected since last job execution."
+              echo "Previous commit is the same as current commit"
             fi
-          else
-            echo "No previous commit SHA found. Skipping comparison."
           fi
-
-      - name: Save last commit SHA as artifact
-        run: |
-          echo "${{ steps.last_commit.outputs.sha }}" > last_commit_sha.txt
-        shell: bash
-      
-      - name: Upload last commit SHA as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: last_commit_sha
-          path: last_commit_sha.txt
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_PULL_REQUEST: ${{ github.event.pull_request.number }}
