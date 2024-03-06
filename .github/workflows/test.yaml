@@ -1,4 +1,4 @@
-name: Check Previous Commit on Pull Request Review
+name: Check Previous Commit on Approved PR
 
 on:
   pull_request_review:
@@ -18,20 +18,29 @@ jobs:
           echo "GitHub SHA: $GITHUB_SHA"
           echo "GitHub Pull Request: $GITHUB_PULL_REQUEST"
 
-      - name: Check if previous commit is different
+      - name: Check if PR is approved
+        if: github.event.review.state == 'approved'
         run: |
-          if [ "$GITHUB_EVENT_NAME" == "pull_request_review" ]; then
-            # Fetch the previous commit SHA from GitHub API
-            PREVIOUS_COMMIT=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PULL_REQUEST/commits" | jq -r '.[-2].sha')
+          # Check if a check suite for the current commit has already been completed
+          CHECK_SUITE_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-suites?check_name=Check%20Previous%20Commit%20Job"
+          CHECK_SUITE_STATE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$CHECK_SUITE_URL" | jq -r '.check_suites[0].conclusion // empty')
 
-            # Compare previous commit with current commit
-            if [ "$PREVIOUS_COMMIT" != "$GITHUB_SHA" ]; then
-              echo "Previous commit is different from current commit"
-              # Do something here, like running additional checks or tasks
-            else
-              echo "Previous commit is the same as current commit"
-            fi
+          if [ -n "$CHECK_SUITE_STATE" ]; then
+            echo "The job has already been run for this commit."
+            exit 0
           fi
+
+          # Fetch the previous commit SHA from GitHub API
+          PREVIOUS_COMMIT=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PULL_REQUEST/commits" | jq -r '.[-2].sha')
+
+          # Compare previous commit with current commit
+          if [ "$PREVIOUS_COMMIT" != "$GITHUB_SHA" ]; then
+            echo "Previous commit is different from current commit"
+            # Do something here, like running additional checks or tasks
+          else
+            echo "Previous commit is the same as current commit"
+          fi
+          
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
