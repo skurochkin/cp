@@ -9,14 +9,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Debug event data
+        run: |
+          echo "GitHub Event Name: $GITHUB_EVENT_NAME"
+          echo "GitHub Repository: $GITHUB_REPOSITORY"
+          echo "GitHub SHA: $GITHUB_SHA"
+          echo "GitHub Pull Request: $GITHUB_PULL_REQUEST"
+
       - name: Check if previous commit is different
         run: |
           if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
             # Fetch the previous commit SHA from GitHub API
-            PREVIOUS_COMMIT=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PULL_REQUEST/events" | jq '.[] | select(.event == "pull_request" and .commit_id != "'"$GITHUB_SHA"'") | .commit_id' | head -n 1 | tr -d '"')
+            PREVIOUS_COMMIT=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PULL_REQUEST/commits" | jq -r '.[-2].sha')
 
             # Compare previous commit with current commit
-            if [ "$PREVIOUS_COMMIT" != "" ]; then
+            if [ "$PREVIOUS_COMMIT" != "$GITHUB_SHA" ]; then
               echo "Previous commit is different from current commit"
               # Do something here, like running additional checks or tasks
             else
