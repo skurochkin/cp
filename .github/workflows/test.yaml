@@ -24,9 +24,8 @@ jobs:
             echo "::set-output name=exists::false"
           fi
 
-      # Download the last commit SHA artifact
       - name: Download last commit SHA artifact
-        if: ${{ steps.check_last_commit_sha.outputs.exists == 'true' }}
+        if: always() && success()
         uses: actions/download-artifact@v2
         with:
           name: last_commit_sha
