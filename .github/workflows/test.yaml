@@ -25,7 +25,7 @@ jobs:
           fi
 
       - name: Compare SHAs
-        if: steps.check_last_commit_sha.outputs.exists == true
+        if: ${{ steps.check_last_commit_sha.outputs.exists == 'true' }}
         run: |
           if [ -f last_commit_sha.txt ]; then
             LAST_SHA=$(cat last_commit_sha.txt)
