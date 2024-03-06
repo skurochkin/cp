@@ -1,9 +1,8 @@
 name: Check New Commits
 
 on:
-  pull_request:
-    branches:
-      - test  # or whatever branch you are using
+  pull_request_review:
+    types: [submitted]
 
 jobs:
   check-commits:
