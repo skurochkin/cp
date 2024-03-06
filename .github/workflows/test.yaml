@@ -20,6 +20,7 @@ jobs:
         run: |
           if [ -f last_commit_sha.txt ]; then
             echo "Last commit SHA exists."
+            echo "::set-output name=exists::true"
           else
             echo "No previous commit SHA found. Assuming this is the first run."
             echo "::set-output name=exists::false"
@@ -27,13 +28,17 @@ jobs:
 
       - name: Save commit SHA as an artifact
         if: steps.check_last_commit_sha.outputs.exists == 'false'
+        run: echo "No previous commit SHA found. Skipping artifact upload."
+
+      - name: Save commit SHA as an artifact
+        if: steps.check_last_commit_sha.outputs.exists == 'true'
         uses: actions/upload-artifact@v2
         with:
           name: last_commit_sha
           path: last_commit_sha.txt
 
       - name: Compare SHAs
-        if: steps.check_last_commit_sha.outputs.exists != 'false'
+        if: steps.check_last_commit_sha.outputs.exists == 'true'
         run: |
           LAST_SHA=$(cat last_commit_sha.txt)
           if [ "${LAST_SHA}" == "${{ steps.last_commit.outputs.sha }}" ]; then
