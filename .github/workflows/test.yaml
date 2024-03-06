@@ -24,11 +24,6 @@ jobs:
             echo "::set-output name=exists::false"
           fi
 
-      - name: Save commit SHA as an artifact
-        if: steps.check_last_commit_sha.outputs.exists == false
-        run: echo "No previous commit SHA found. Skipping artifact upload."
-
-
       - name: Compare SHAs
         if: steps.check_last_commit_sha.outputs.exists == true
         run: |
@@ -44,9 +39,13 @@ jobs:
             echo "No previous commit SHA found. Skipping comparison."
           fi
 
-      - name: Save commit SHA as an artifact
-        if: always()
+      - name: Save last commit SHA as artifact
+        run: |
+          echo "${{ steps.last_commit.outputs.sha }}" > last_commit_sha.txt
+        shell: bash
+      
+      - name: Upload last commit SHA as artifact
         uses: actions/upload-artifact@v2
         with:
           name: last_commit_sha
-          path: last_commit_sha.txt    
+          path: last_commit_sha.txt
