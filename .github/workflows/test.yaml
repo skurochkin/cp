@@ -37,7 +37,8 @@ jobs:
         id: read_last_commit_sha
         run: |
           LAST_SHA=$(cat artifacts/last_commit_sha.txt)
-          echo "::set-output name=last_sha::$LAST_SHA"    
+          echo "::set-output name=last_sha::$LAST_SHA"
+        continue-on-error: true      
 
       - name: Compare SHAs
         if: ${{ steps.check_last_commit_sha.outputs.exists == 'true' }}
