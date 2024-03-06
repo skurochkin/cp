@@ -24,6 +24,21 @@ jobs:
             echo "::set-output name=exists::false"
           fi
 
+      # Download the last commit SHA artifact
+      - name: Download last commit SHA artifact
+        if: ${{ steps.check_last_commit_sha.outputs.exists == 'true' }}
+        uses: actions/download-artifact@v2
+        with:
+          name: last_commit_sha
+          path: artifacts
+
+      # Read the last commit SHA from the artifact
+      - name: Read last commit SHA
+        id: read_last_commit_sha
+        run: |
+          LAST_SHA=$(cat artifacts/last_commit_sha.txt)
+          echo "::set-output name=last_sha::$LAST_SHA"    
+
       - name: Compare SHAs
         if: ${{ steps.check_last_commit_sha.outputs.exists == 'true' }}
         run: |
