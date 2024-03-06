@@ -1,5 +1,3 @@
-name: Check New Commits on Pull Request Review
-
 on:
   pull_request_review:
     types: [submitted]
@@ -27,23 +25,28 @@ jobs:
           fi
 
       - name: Save commit SHA as an artifact
-        if: steps.check_last_commit_sha.outputs.exists == 'false'
+        if: steps.check_last_commit_sha.outputs.exists == false
         run: echo "No previous commit SHA found. Skipping artifact upload."
 
+
+      - name: Compare SHAs
+        if: steps.check_last_commit_sha.outputs.exists == true
+        run: |
+          if [ -f last_commit_sha.txt ]; then
+            LAST_SHA=$(cat last_commit_sha.txt)
+            if [ "${LAST_SHA}" == "${{ steps.last_commit.outputs.sha }}" ]; then
+              echo "No new commits since last job execution."
+            else
+              echo "New commits detected since last job execution."
+              exit 1
+            fi
+          else
+            echo "No previous commit SHA found. Skipping comparison."
+          fi
+
       - name: Save commit SHA as an artifact
-        if: steps.check_last_commit_sha.outputs.exists == 'true'
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: last_commit_sha
-          path: last_commit_sha.txt
-
-      - name: Compare SHAs
-        if: steps.check_last_commit_sha.outputs.exists == 'true'
-        run: |
-          LAST_SHA=$(cat last_commit_sha.txt)
-          if [ "${LAST_SHA}" == "${{ steps.last_commit.outputs.sha }}" ]; then
-            echo "No new commits since last job execution."
-          else
-            echo "New commits detected since last job execution."
-            exit 1
-          fi
+          path: last_commit_sha.txt    
