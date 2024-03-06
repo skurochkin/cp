@@ -25,11 +25,12 @@ jobs:
           fi
 
       - name: Download last commit SHA artifact
-        if: always() && success()
+        if: always()
         uses: actions/download-artifact@v2
         with:
           name: last_commit_sha
           path: artifacts
+        continue-on-error: true
 
       # Read the last commit SHA from the artifact
       - name: Read last commit SHA
