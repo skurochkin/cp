@@ -32,6 +32,8 @@ jobs:
             if [ "${LAST_SHA}" == "${{ steps.last_commit.outputs.sha }}" ]; then
               echo "No new commits since last job execution."
             else
+              echo "${{LAST_SHA}}"
+              echp "${{steps.last_commit.outputs.sha}}"
               echo "New commits detected since last job execution."
             fi
           else
