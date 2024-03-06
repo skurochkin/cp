@@ -33,7 +33,6 @@ jobs:
               echo "No new commits since last job execution."
             else
               echo "New commits detected since last job execution."
-              exit 1
             fi
           else
             echo "No previous commit SHA found. Skipping comparison."
