@@ -14,18 +14,34 @@ jobs:
           pull_request_number=${{ github.event.pull_request.number }}
           commit_sha=${{ github.event.pull_request.head.sha }}
 
+          # Fetch the list of commits in the pull request
+          pull_request_commits=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                                   -H "Accept: application/vnd.github.v3+json" \
+                                   ${{ github.api_url }}/repos/${{ github.repository }}/pulls/$pull_request_number/commits \
+                                   | jq -r '.[].sha')
+
           # Fetch the list of approved reviews for the current pull request
           approved_reviews=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                               -H "Accept: application/vnd.github.v3+json" \
                               ${{ github.api_url }}/repos/${{ github.repository }}/pulls/$pull_request_number/reviews \
                               | jq -r '.[] | select(.state == "APPROVED") | .commit_id')
 
-          # Check if the current commit is in the list of approved commits
-          if echo "$approved_reviews" | grep -q "$commit_sha"; then
-            echo "::set-output name=first_approval::false"
-          else
-            echo "::set-output name=first_approval::true"
-          fi
+          # Check if the current commit is the first approved commit among all commits in the pull request
+          is_first_approved_commit=false
+          for commit in $pull_request_commits; do
+            if [ "$commit" == "$commit_sha" ]; then
+              is_first_approved_commit=true
+              break
+            fi
+            # If the commit is approved, then it's not the first one
+            if echo "$approved_reviews" | grep -q "$commit"; then
+              is_first_approved_commit=false
+              break
+            fi
+          done
+
+          # Set output based on whether it's the first approval
+          echo "::set-output name=first_approval::$is_first_approved_commit"
 
       - name: Execute workflow if it's the first approval
         if: steps.check_approval.outputs.first_approval == 'true'
