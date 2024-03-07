@@ -1,0 +1,14 @@
+name: Pull Request Approval Workflow
+
+on:
+  merge_group:
+    types: [checks_requested]
+
+jobs:
+  check_approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute workflow if it's the first approval
+        run: |
+          # Your workflow steps go here
+          echo "Test Request Best"
