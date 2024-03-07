@@ -1,47 +1,43 @@
-name: Check Previous Commit on Approved PR
+name: Pull Request Approval Workflow
 
 on:
   pull_request_review:
     types: [submitted]
 
 jobs:
-  check_commit:
+  check_approval:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Debug event data
+      - name: Check if it's the first approval
+        id: check_approval
         run: |
-          echo "GitHub Event Name: $GITHUB_EVENT_NAME"
-          echo "GitHub Repository: $GITHUB_REPOSITORY"
-          echo "GitHub SHA: $GITHUB_SHA"
-          echo "GitHub Pull Request: $GITHUB_PULL_REQUEST"
+          pull_request_number=${{ github.event.pull_request.number }}
+          commit_sha=${{ github.event.pull_request.head.sha }}
 
-      - name: Check if PR is approved
-        if: github.event.review.state == 'approved'
-        run: |
-          # Check if a check suite for the current commit has already been completed
-          CHECK_SUITE_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-suites?check_name=Check%20Previous%20Commit%20Job"
-          CHECK_SUITE_STATE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$CHECK_SUITE_URL" | jq -r '.check_suites[0].conclusion // empty')
+          # Fetch the list of approved reviews for the current pull request
+          approved_reviews=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                              -H "Accept: application/vnd.github.v3+json" \
+                              ${{ github.api_url }}/repos/${{ github.repository }}/pulls/$pull_request_number/reviews \
+                              | jq '[.[] | select(.state == "APPROVED") | .commit_id]')
 
-          if [ -n "$CHECK_SUITE_STATE" ]; then
-            echo "The job has already been run for this commit."
-            exit 0
-          fi
+          # Fetch the list of commits in the pull request
+          pull_request_commits=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                                   -H "Accept: application/vnd.github.v3+json" \
+                                   ${{ github.api_url }}/repos/${{ github.repository }}/pulls/$pull_request_number/commits \
+                                   | jq -r '.[].sha')
 
-          # Fetch the previous commit SHA from GitHub API
-          PREVIOUS_COMMIT=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PULL_REQUEST/commits" | jq -r '.[-2].sha')
+          # Check if the current commit is in the list of approved commits
+          is_approved=$(echo "$approved_reviews" | jq -r ".[] | select(. == \"$commit_sha\")")
 
-          # Compare previous commit with current commit
-          if [ "$PREVIOUS_COMMIT" != "$GITHUB_SHA" ]; then
-            echo "Previous commit is different from current commit"
-            # Do something here, like running additional checks or tasks
+          # If the current commit is the first approved commit in the pull request, set the output to true
+          if [ -n "$is_approved" ]; then
+            echo "::set-output name=first_approval::true"
           else
-            echo "Previous commit is the same as current commit"
+            echo "::set-output name=first_approval::false"
           fi
-          
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_PULL_REQUEST: ${{ github.event.pull_request.number }}
+
+      - name: Execute workflow if it's the first approval
+        if: steps.check_approval.outputs.first_approval == 'true'
+        run: |
+          # Your workflow steps go here
+          echo "Test Request Best"
