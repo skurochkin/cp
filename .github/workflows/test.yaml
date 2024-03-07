@@ -18,22 +18,13 @@ jobs:
           approved_reviews=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                               -H "Accept: application/vnd.github.v3+json" \
                               ${{ github.api_url }}/repos/${{ github.repository }}/pulls/$pull_request_number/reviews \
-                              | jq '[.[] | select(.state == "APPROVED") | .commit_id]')
-
-          # Fetch the list of commits in the pull request
-          pull_request_commits=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                                   -H "Accept: application/vnd.github.v3+json" \
-                                   ${{ github.api_url }}/repos/${{ github.repository }}/pulls/$pull_request_number/commits \
-                                   | jq -r '.[].sha')
+                              | jq -r '.[] | select(.state == "APPROVED") | .commit_id')
 
           # Check if the current commit is in the list of approved commits
-          is_approved=$(echo "$approved_reviews" | jq -r ".[] | select(. == \"$commit_sha\")")
-
-          # If the current commit is the first approved commit in the pull request, set the output to true
-          if [ -n "$is_approved" ]; then
-            echo "::set-output name=first_approval::true"
-          else
+          if echo "$approved_reviews" | grep -q "$commit_sha"; then
             echo "::set-output name=first_approval::false"
+          else
+            echo "::set-output name=first_approval::true"
           fi
 
       - name: Execute workflow if it's the first approval
